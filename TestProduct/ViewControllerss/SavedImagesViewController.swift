@@ -24,12 +24,12 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
     }()
     
     
-
+    
     
     
     override func viewDidLoad() {
         super.viewDidLoad()
-
+        
         // Do any additional setup after loading the view.
         view.backgroundColor = .white
         savedImages = realm.objects(SelectedImage.self).map({$0})
@@ -44,7 +44,7 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
         tableView.reloadData()
     }
     
-
+    
     func setupTableViewConstraints() {
         NSLayoutConstraint.activate([
             tableView.topAnchor.constraint(equalTo: view.topAnchor),
@@ -53,7 +53,7 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
             tableView.trailingAnchor.constraint(equalTo: view.trailingAnchor),
         ])
     }
-
+    
     func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return savedImages.count
         
@@ -70,6 +70,8 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
             cell.loadButton.isUserInteractionEnabled = false
         } else {
             cell.loadButton.setBackgroundImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
+            cell.loadButton.isUserInteractionEnabled = true
+            cell.loadButton.tintColor = .systemOrange
         }
         
         
@@ -84,47 +86,57 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
     
     @objc func uploadImage(_ sender: UIButton) {
         let index = sender.tag
-                let imageData = savedImages[index].imageData
+        let imageData = savedImages[index].imageData
         uploadImageOne(imageData, index: index, button: sender)
     }
     
     
     func uploadImageOne(_ imageData: Data, index: Int , button: UIButton) {
-            let boundary = "Boundary-\(UUID().uuidString)"
-            var body = Data()
+        let boundary = "Boundary-\(UUID().uuidString)"
+        var body = Data()
+        
+        body += Data("--\(boundary)\r\n".utf8)
+        body += Data("Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r\n".utf8)
+        body += Data("Content-Type: image/jpeg\r\n\r\n".utf8)
+        body += imageData
+        body += Data("\r\n--\(boundary)--\r\n".utf8)
+        
+        var request = URLRequest(url: URL(string: "https://www.clippr.ai/api/upload")!, timeoutInterval: Double.infinity)
+        request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
+        request.httpMethod = "POST"
+        request.httpBody = body
+        
+        
+        DispatchQueue.main.async {
+            button.setTitle("Uploading", for: .normal)
+            button.titleLabel?.font = UIFont.systemFont(ofSize: 10)
+            button.setTitleColor(.systemGreen, for: .normal)
+            button.setBackgroundImage(nil, for: .normal) // Remove the icon while loading
+        }
+        
+        
+        
+        let task = URLSession.shared.dataTask(with: request) { data, response, error in
+            guard let data = data, error == nil else {
+                print("Error: \(String(describing: error))")
+                return
+            }
+            print("Upload Response:", String(data: data, encoding: .utf8)!)
             
-            body += Data("--\(boundary)\r\n".utf8)
-            body += Data("Content-Disposition: form-data; name=\"image\"; filename=\"image.jpg\"\r\n".utf8)
-            body += Data("Content-Type: image/jpeg\r\n\r\n".utf8)
-            body += imageData
-            body += Data("\r\n--\(boundary)--\r\n".utf8)
             
-            var request = URLRequest(url: URL(string: "https://www.clippr.ai/api/upload")!, timeoutInterval: Double.infinity)
-            request.addValue("multipart/form-data; boundary=\(boundary)", forHTTPHeaderField: "Content-Type")
-            request.httpMethod = "POST"
-            request.httpBody = body
-
-            let task = URLSession.shared.dataTask(with: request) { data, response, error in
-                guard let data = data, error == nil else {
-                    print("Error: \(String(describing: error))")
-                    return
-                }
-                print("Upload Response:", String(data: data, encoding: .utf8)!)
-                
-                // Update the button background image to a checkmark on the main thread
-//                try? self.realm.write {
-//                    self.savedImages[index].isUploaded = true
-//                            }
-                DispatchQueue.main.async {
-                    button.setBackgroundImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
-                    try? self.realm.write {
-                                self.savedImages[index].isUploaded = true
-                            }
+            DispatchQueue.main.async {
+                button.setBackgroundImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+                button.setTitle("", for: .normal)
+                button.tintColor = .systemGray2
+                button.isUserInteractionEnabled = false
+                try? self.realm.write {
+                    self.savedImages[index].isUploaded = true
                 }
             }
-
-            task.resume()
         }
+        
+        task.resume()
+    }
     
 }
 
@@ -134,8 +146,8 @@ extension SavedImagesViewController: UITableViewDelegate {
         return 280
     }
     
-    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
-        print("The Details of the Selected Photo", savedImages[indexPath.row])
-    }
+//    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+//        print("The Details of the Selected Photo", savedImages[indexPath.row])
+//    }
     
 }

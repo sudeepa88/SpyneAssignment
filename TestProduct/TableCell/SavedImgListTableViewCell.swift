@@ -50,8 +50,8 @@ class SavedImgListTableViewCell: UITableViewCell {
             
             loadButton.topAnchor.constraint(equalTo: imageClicked.bottomAnchor, constant: 5),
             loadButton.trailingAnchor.constraint(equalTo: contentView.trailingAnchor, constant: -15),
-            loadButton.widthAnchor.constraint(equalToConstant: 30),
-            loadButton.heightAnchor.constraint(equalToConstant: 30)
+            loadButton.widthAnchor.constraint(equalToConstant: 50),
+            loadButton.heightAnchor.constraint(equalToConstant: 50)
         ])
     }
 }
