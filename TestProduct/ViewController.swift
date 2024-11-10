@@ -139,7 +139,13 @@ class ViewController: UIViewController {
                 view.layer.addSublayer(videoPreviewLayer)
             }
             
-            captureSession.startRunning()
+//            captureSession.startRunning()
+            
+            DispatchQueue.global(qos: .background).async {
+                        captureSession.startRunning()
+                    }
+            
+            
         } catch {
             print("Error setting up camera: \(error)")
         }
