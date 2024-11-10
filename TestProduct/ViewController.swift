@@ -40,7 +40,7 @@ class ViewController: UIViewController {
             button.setTitle("View Gallery", for: .normal)
             button.layer.cornerRadius = 20
             button.backgroundColor = .systemBlue
-            button.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
+            button.addTarget(self, action: #selector(savedPhotos), for: .touchUpInside)
             return button
         }()
 
@@ -55,6 +55,19 @@ class ViewController: UIViewController {
             button.addTarget(self, action: #selector(dismissCamera), for: .touchUpInside)
             return button
         }()
+    
+    let recentButton: UIButton = {
+            let button = UIButton()
+            button.translatesAutoresizingMaskIntoConstraints = false
+            //button.setTitle("Back", for: .normal)
+            button.setBackgroundImage(UIImage(systemName: "square.fill.on.square.fill"), for: .normal)
+            button.setTitleColor(.white, for: .normal)
+            button.backgroundColor = .systemYellow
+            button.layer.cornerRadius = 10
+            button.addTarget(self, action: #selector(openGallery), for: .touchUpInside)
+            return button
+        }()
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -86,6 +99,8 @@ class ViewController: UIViewController {
         setupActionButtons()
         
         setupBackButton()
+        
+        setupRecentButton()
     }
 
     
@@ -146,6 +161,18 @@ class ViewController: UIViewController {
         ])
     }
 
+    func setupRecentButton() {
+        view.addSubview(recentButton)
+        
+        NSLayoutConstraint.activate([
+            recentButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -20),
+            recentButton.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor, constant: -20),
+            recentButton.widthAnchor.constraint(equalToConstant: 40),
+            recentButton.heightAnchor.constraint(equalToConstant: 40),
+        ])
+    }
+    
+    
     func setupPhotoPreviewView() {
         photoPreviewView = UIImageView()
         photoPreviewView?.translatesAutoresizingMaskIntoConstraints = false
@@ -229,6 +256,7 @@ class ViewController: UIViewController {
            acceptButton?.removeFromSuperview()
            rejectButton?.removeFromSuperview()
            backButton.removeFromSuperview()
+           recentButton.removeFromSuperview()
        }
     
     
@@ -255,6 +283,10 @@ class ViewController: UIViewController {
     @objc func rejectPhoto() {
         print("Photo rejected")
         hidePhotoPreview()
+    }
+    
+    @objc func savedPhotos() {
+        navigationController?.pushViewController(SavedImagesViewController(), animated: true)
     }
     
     func hidePhotoPreview() {
