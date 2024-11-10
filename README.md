@@ -20,8 +20,8 @@ Test Cases:
 
 Important Things Still Due:
      1. Add a loading view load and hide view
-     2. Add Url Session and upload photos in the given api
+     2. Add Url Session and upload photos in the given api(Done)
      3. Change the button State
-     4. Why NSCache is not roalding the first photo ?
-     5. Add an alert view if it is running on simulator .
+     4. Add dispatch queue and a loader to upload the image without blocking main ui
+     
     
