@@ -40,6 +40,10 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
         setupTableViewConstraints()
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        tableView.reloadData()
+    }
+    
 
     func setupTableViewConstraints() {
         NSLayoutConstraint.activate([
@@ -59,6 +63,16 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
         let cell = tableView.dequeueReusableCell(withIdentifier: "imageList", for: indexPath) as! SavedImgListTableViewCell
         
         //cell.imageClicked.image = UIImage(named: "TestImg")
+        
+        if savedImages[indexPath.row].isUploaded == true {
+            cell.loadButton.setBackgroundImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+            cell.loadButton.tintColor = .systemGray2
+            cell.loadButton.isUserInteractionEnabled = false
+        } else {
+            cell.loadButton.setBackgroundImage(UIImage(systemName: "square.and.arrow.up"), for: .normal)
+        }
+        
+        
         cell.imageClicked.image = UIImage(data: savedImages[indexPath.row].imageData)
         cell.loadButton.tag = indexPath.row
         cell.loadButton.addTarget(self, action: #selector(uploadImage) , for: .touchUpInside)
@@ -71,11 +85,11 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
     @objc func uploadImage(_ sender: UIButton) {
         let index = sender.tag
                 let imageData = savedImages[index].imageData
-                uploadImageOne(imageData, button: sender)
+        uploadImageOne(imageData, index: index, button: sender)
     }
     
     
-    func uploadImageOne(_ imageData: Data, button: UIButton) {
+    func uploadImageOne(_ imageData: Data, index: Int , button: UIButton) {
             let boundary = "Boundary-\(UUID().uuidString)"
             var body = Data()
             
@@ -98,8 +112,14 @@ class SavedImagesViewController: UIViewController, UITableViewDataSource {
                 print("Upload Response:", String(data: data, encoding: .utf8)!)
                 
                 // Update the button background image to a checkmark on the main thread
+//                try? self.realm.write {
+//                    self.savedImages[index].isUploaded = true
+//                            }
                 DispatchQueue.main.async {
                     button.setBackgroundImage(UIImage(systemName: "checkmark.circle.fill"), for: .normal)
+                    try? self.realm.write {
+                                self.savedImages[index].isUploaded = true
+                            }
                 }
             }
 

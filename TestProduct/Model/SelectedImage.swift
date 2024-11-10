@@ -12,4 +12,5 @@ import RealmSwift
 class SelectedImage: Object {
     @Persisted(primaryKey: true) var id: String
     @Persisted var imageData: Data
+    @Persisted var isUploaded: Bool
 }

@@ -87,6 +87,7 @@ class ImageTableViewController: UIViewController, UITableViewDataSource, UITable
             let cachedImageObject = SelectedImage()
             cachedImageObject.imageData = imageData
             cachedImageObject.id = cacheKey
+            cachedImageObject.isUploaded = false
             
             do {
                 try realm.write {
